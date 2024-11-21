@@ -2,6 +2,10 @@ from datasets import load_dataset
 from transformers import CLIPProcessor, CLIPModel
 from PIL import Image
 import torch
+from googletrans import Translator
+
+# Crear el traductor
+translator = Translator()
 
 # Cargar el modelo y procesador CLIP
 model_name = "openai/clip-vit-base-patch32"
@@ -61,13 +65,18 @@ image_embeddings, images = get_dataset_embeddings(dataset)
 
 # Bucle para ingresar texto por terminal
 while True:
-    user_input = input("Describe la habitación que buscas (o escribe 'salir' para terminar): ")
-    if user_input.lower() == "salir":
+    user_input_espanol = input("Describe la habitación que buscas (o escribe 'salir' para terminar): ")
+    if user_input_espanol.lower() == "salir":
         break
+    # Traducir la entrada del usuario al inglés
+    user_input = translator.translate(user_input_espanol, src='es', dest='en').text
 
-    # Buscar la mejor imagen
-    best_match = find_best_match(user_input, image_embeddings, images)
-    print(f"La imagen más relevante es: ")
-    
-    # Mostrar la imagen
-    show_image(best_match)
+    try:
+        # Buscar la mejor imagen
+        best_match = find_best_match(user_input, image_embeddings, images)
+        print(f"La imagen más relevante es:")
+
+        # Mostrar la imagen
+        show_image(best_match)
+    except Exception as e:
+        print(f"Error al procesar la solicitud: {e}")
