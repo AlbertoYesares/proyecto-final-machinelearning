@@ -33,7 +33,6 @@ def search_furniture_ikea(keyword, country="us", language="en"):
 
 def detect_furniture(image):
     results = detector(image)
-    furniture_items = []
     for result in results[0].boxes:
         label = result.cls
         label_number = int(label.item()) 
