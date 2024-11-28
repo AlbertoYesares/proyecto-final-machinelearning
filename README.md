@@ -1,4 +1,3 @@
-
 # Proyecto Final Machine Learning - Buscador y Comparador de Imágenes de Interiores
 
 Este proyecto es un sistema inteligente que utiliza modelos de Machine Learning para buscar y comparar muebles de interiores basándose en descripciones o imágenes. Ofrece recomendaciones de IKEA y genera imágenes de inspiración visual.
@@ -30,55 +29,80 @@ Este sistema permite:
 ### Paso a Paso
 
 1. **Clona este repositorio:**
-bash
+   ```bash
    git clone https://github.com/AlbertoYesares/proyecto-final-machinelearning.git
    cd proyecto-final-machinelearning
-   
+   ```
+
 2. **Instala las dependencias necesarias:**
-   Ejecuta el siguiente comando para instalar las bibliotecas requeridas:
-bash
+   Instala todas las bibliotecas requeridas ejecutando:
+   ```bash
    pip install -r requirements.txt
-   
-3. **Instala YOLOv8:**
-   YOLOv8 es necesario para la detección de muebles en las imágenes. Instálalo ejecutando:
-bash
+   ```
+
+3. **Instala YOLOv8 (si no se instala con `requirements.txt`):**
+   ```bash
    pip install ultralytics
-   
+   ```
+
 4. **Configura la API de IKEA:**
    - Regístrate en [RapidAPI](https://rapidapi.com/) y obtén una API Key para IKEA.
+    - Para ver todos los detalles de la API, consulta este link: (https://rapidapi.com/Octapi/api/ikea-api).
    - Agrega tu API Key al archivo `ikea_search.py` en la variable `x-rapidapi-key`:
-python
+     ```python
      headers = {
          "x-rapidapi-key": "TU_API_KEY",
          "x-rapidapi-host": "ikea-api.p.rapidapi.com"
      }
-     
+     ```
+
 5. **Ejecuta el programa:**
    Dirígete al directorio del proyecto y ejecuta:
-bash
+   ```bash
    python main.py
-   
+   ```
+
 ---
 
 ## Dependencias
 
-Asegúrate de que estas bibliotecas están instaladas antes de ejecutar el proyecto. Todas están listadas en el archivo `requirements.txt` y se pueden instalar con:
-bash
-pip install -r requirements.txt
-### Contenido del archivo `requirements.txt`:
+El proyecto utiliza las siguientes bibliotecas y frameworks:
 
+- `pandas`: Para la manipulación de datos.
+- `numpy`: Para operaciones matemáticas avanzadas.
+- `torch`: Framework de aprendizaje profundo.
+- `transformers`: Para trabajar con el modelo CLIP.
+- `torchvision`: Para la manipulación de imágenes.
+- `pillow`: Para la gestión de imágenes.
+- `datasets`: Para cargar y procesar datos.
+- `ultralytics`: Para trabajar con YOLOv8.
+- `gradio`: Para la interfaz gráfica.
+- `scikit-learn`: Para cálculo de similitud de coseno.
+- `requests`: Para consumir la API de IKEA.
+- `translate`: Para traducción de texto (español a inglés).
+
+Asegúrate de que estas bibliotecas están instaladas. Todas están listadas en el archivo `requirements.txt`.
+
+### Contenido del archivo `requirements.txt`:
+```
+pandas
+numpy
+torch
 transformers
 torchvision
 pillow
 datasets
 ultralytics
 gradio
-- **transformers:** Para trabajar con el modelo CLIP.
-- **torchvision:** Para manipular imágenes.
-- **pillow:** Para la gestión de imágenes.
-- **datasets:** Para cargar y procesar datos.
-- **ultralytics:** Para YOLOv8.
-- **gradio:** Para la interfaz gráfica de usuario.
+scikit-learn
+requests
+translate
+```
+
+Instálalas con:
+```bash
+pip install -r requirements.txt
+```
 
 ---
 
@@ -86,10 +110,10 @@ gradio
 
 1. **Ejecución:**
    - Ve al directorio del proyecto y ejecuta:
-bash
+     ```bash
      python main.py
-     
-- Esto abrirá una interfaz de usuario en tu navegador a través de Gradio.
+     ```
+   - Esto abrirá una interfaz de usuario en tu navegador a través de Gradio.
 
 2. **Opciones de búsqueda:**
    - **Por descripción:** Introduce una descripción textual del espacio o mueble que buscas.
@@ -117,31 +141,18 @@ bash
 - **CLIP:** Para análisis visual y textual.
 - **Gradio:** Para la interfaz gráfica de usuario.
 - **API de IKEA:** Para obtener información de muebles.
-
----
-
-## Contribución
-
-Si deseas contribuir al proyecto:
-1. Haz un fork del repositorio.
-2. Crea una nueva rama:
-bash
-   git checkout -b feature/nueva-funcionalidad
-   
-3. Realiza tus cambios y haz un commit:
-bash
-   git commit -m "Añadida nueva funcionalidad"
-   
-4. Haz un push de tus cambios:
-bash
-   git push origin feature/nueva-funcionalidad
-   
-5. Abre un Pull Request en el repositorio principal.
+- **Scikit-learn:** Para cálculo de similitudes.
 
 ---
 
 ## Licencia
 
 Este proyecto está bajo la Licencia MIT. Consulta el archivo `LICENSE` para más detalles.
+```
 
----
+### **Puntos importantes:**
+- He listado todas las dependencias necesarias en el archivo `requirements.txt`.
+- Incluí instrucciones detalladas para instalar y configurar todo, incluida la API de IKEA.
+- Este archivo es completo y no deja nada fuera del flujo de instalación y uso.
+
+Guarda este contenido como `README.md` en el directorio del proyecto. 😊

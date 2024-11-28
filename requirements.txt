@@ -1,0 +1,12 @@
+pandas
+numpy
+torch
+transformers
+torchvision
+pillow
+datasets
+ultralytics
+gradio
+scikit-learn
+requests
+translate
