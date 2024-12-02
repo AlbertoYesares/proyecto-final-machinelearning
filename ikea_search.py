@@ -15,7 +15,7 @@ headers = {
 
 # print(response.json())
 
-def search_furniture_ikea(keyword, country="us", language="en"):
+def search_furniture_ikea(keyword, country="us", language="en", n_results=5):
     params = {
         "keyword": keyword,
         "countryCode": country,
@@ -24,11 +24,13 @@ def search_furniture_ikea(keyword, country="us", language="en"):
     try:
         response = requests.get(url, headers=headers, params=params)
         if response.status_code == 200:
-            return response.json()  
+            # Devuelve los primeros n resultados
+            return response.json()[:n_results]
         else:
             return {"error": f"Error en la API: {response.status_code} - {response.text}"}
     except Exception as e:
         return {"error": str(e)}
+
     
 
 def detect_furniture(image):

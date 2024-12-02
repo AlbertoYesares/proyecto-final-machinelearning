@@ -38,75 +38,122 @@ def search_furniture(description):
     if not user_input:
         return "Error en la traducción.", None, None, None, None
 
+    # Generar el embedding del texto
     inputs = processor(text=user_input, return_tensors="pt")
     with torch.no_grad():
         text_embedding = model.get_text_features(**inputs).squeeze(0)
 
+    # Buscar las imágenes más relevantes en el dataset
     results = query_csv(file_name, text_embedding, n_results=1)
     if results.empty:
         return "No se encontró una imagen relevante.", None, None, None, None
 
+    # Obtener la ruta de la imagen más relevante
+    base_path = os.getcwd()
     best_match_metadata = json.loads(results.iloc[0]["metadata"])
-    best_match_path = best_match_metadata["path"]
+    relative_path = best_match_metadata["path"]
+    best_match_path = os.path.join(base_path, relative_path)
 
     if not os.path.exists(best_match_path):
         return f"No se encontró la imagen en la ruta: {best_match_path}", None, None, None, None
 
+    # Detectar el mueble en la imagen
     image = Image.open(best_match_path)
     furniture = detect_furniture(image)
     if not furniture:
         return "No se detectó ningún mueble.", None, None, None, None
 
-    mueble_encontrado = search_furniture_ikea(furniture)
-    if not mueble_encontrado:
-        return "No se encontró información sobre el mueble en IKEA.", None, None, None, None
+    # Buscar muebles similares en IKEA
+    muebles_encontrados = search_furniture_ikea(furniture, n_results=5)
+    if not muebles_encontrados or "error" in muebles_encontrados:
+        return "No se encontraron muebles en IKEA.", None, None, None, None
 
-    ikea_data = mueble_encontrado[0]
-    ikea_image = ikea_data["image"]
-    ikea_name = ikea_data["name"]
-    ikea_price = f"{ikea_data['price']['currency']} {ikea_data['price']['currentPrice']}"
-    ikea_url = ikea_data["url"]
+    # Procesar los datos de los muebles encontrados
+    muebles_tabla = []
+    for mueble in muebles_encontrados:
+        muebles_tabla.append({
+            "name": mueble["name"],
+            "price": f"{mueble['price']['currency']} {mueble['price']['currentPrice']}",
+            "url": mueble["url"]
+        })
 
-    return ikea_name, ikea_price, ikea_url, best_match_path, ikea_image
+    return best_match_path, muebles_tabla
+
 
 # Función para procesar imagen
 def process_uploaded_image(image):
+    # Detectar mueble en la imagen
     furniture = detect_furniture(image)
     if not furniture:
-        return "No se detectó ningún mueble en la imagen.", None, None, None, None
+        return "No se detectó ningún mueble en la imagen.", None
 
-    mueble_encontrado = search_furniture_ikea(furniture)
-    if not mueble_encontrado:
-        return "No se encontró información sobre el mueble en IKEA.", None, None, None, None
+    # Buscar muebles similares en IKEA
+    muebles_encontrados = search_furniture_ikea(furniture, n_results=5)
+    if not muebles_encontrados or "error" in muebles_encontrados:
+        return "No se encontraron muebles en IKEA.", None
 
-    ikea_data = mueble_encontrado[0]
-    ikea_image = ikea_data["image"]
-    ikea_name = ikea_data["name"]
-    ikea_price = f"{ikea_data['price']['currency']} {ikea_data['price']['currentPrice']}"
-    ikea_url = ikea_data["url"]
+    # Procesar los datos de los muebles encontrados
+    muebles_tabla = []
+    for mueble in muebles_encontrados:
+        muebles_tabla.append({
+            "name": mueble["name"],
+            "price": f"{mueble['price']['currency']} {mueble['price']['currentPrice']}",
+            "url": mueble["url"]
+        })
 
-    # Buscar inspiración en el dataset
+    # Buscar la imagen más relevante en el dataset
     inputs = processor(images=image, return_tensors="pt")
     with torch.no_grad():
         image_embedding = model.get_image_features(**inputs).squeeze(0)
 
     results = query_csv(file_name, image_embedding, n_results=1)
-    best_match_path = json.loads(results.iloc[0]["metadata"])["path"] if not results.empty else None
+    if results.empty:
+        return None, muebles_tabla
 
-    return ikea_name, ikea_price, ikea_url, best_match_path, ikea_image
+    base_path = os.getcwd()
+    best_match_metadata = json.loads(results.iloc[0]["metadata"])
+    relative_path = best_match_metadata["path"]
+    best_match_path = os.path.join(base_path, relative_path)
+
+    return best_match_path, muebles_tabla
+
 
 # Crear interfaz con Gradio
 def app_interface(description, uploaded_image):
     if description and uploaded_image is None:
-        ikea_name, ikea_price, ikea_url, local_image_path, ikea_image_url = search_furniture(description)
+        # Buscar basado en la descripción
+        local_image_path, muebles_tabla = search_furniture(description)
     elif uploaded_image is not None:
-        ikea_name, ikea_price, ikea_url, local_image_path, ikea_image_url = process_uploaded_image(uploaded_image)
+        # Procesar imagen cargada
+        local_image_path, muebles_tabla = process_uploaded_image(uploaded_image)
     else:
-        return "Por favor, proporciona una descripción o sube una imagen.", None, None, None
+        return "Por favor, proporciona una descripción o sube una imagen.", None, None
 
-    if not ikea_name:
-        return "No se encontraron resultados.", None, None, None
-    return ikea_name, ikea_price, ikea_url, (local_image_path, ikea_image_url)
+    if not local_image_path:
+        return "No se encontraron resultados.", None, None
+
+    # Generar una tabla de los muebles encontrados
+    muebles_table_html = """
+    <table style="width:100%; text-align:left; border-collapse: collapse; border: 1px solid black;">
+        <tr>
+            <th style="border: 1px solid black; padding: 8px;">Nombre</th>
+            <th style="border: 1px solid black; padding: 8px;">Precio</th>
+            <th style="border: 1px solid black; padding: 8px;">Enlace</th>
+        </tr>
+    """
+    for mueble in muebles_tabla:
+        muebles_table_html += f"""
+        <tr>
+            <td style="border: 1px solid black; padding: 8px;">{mueble['name']}</td>
+            <td style="border: 1px solid black; padding: 8px;">{mueble['price']}</td>
+            <td style="border: 1px solid black; padding: 8px;"><a href="{mueble['url']}" target="_blank">Ver en IKEA</a></td>
+        </tr>
+        """
+    muebles_table_html += "</table>"
+
+    return local_image_path, muebles_table_html
+
+
 
 
 # Diseño personalizado
@@ -134,18 +181,21 @@ interface = gr.Interface(
             label="Describe la habitación que buscas:",
             placeholder="Ejemplo: Un dormitorio acogedor con muebles minimalistas"
         ),
-        gr.Image(label="Sube una imagen de referencia:"),
+        gr.Image(
+            label="Sube una imagen de referencia (opcional):",
+            type="pil"  # Asegura que la imagen sea procesada como un objeto PIL
+        ),
     ],
     outputs=[
-        gr.Textbox(label="Nombre del mueble", interactive=False),
-        gr.Textbox(label="Precio", interactive=False),
-        gr.Textbox(label="Link a IKEA", interactive=False),
-        gr.Gallery(label="Imágenes (Local vs IKEA)", show_label=False),
+        gr.Image(label="Imagen más relevante encontrada:"),
+        gr.HTML(label="Muebles recomendados:"),
     ],
     title="<div id='title'>Búsqueda Inteligente de Muebles IKEA</div>",
     description="<div id='description'>Proporciona una descripción o sube una imagen para encontrar muebles relacionados en IKEA.</div>",
     css=css,
 )
+
+
 
 # Ejecutar la app
 if __name__ == "__main__":
