@@ -36,39 +36,33 @@ else:
 def search_furniture(description):
     user_input = translate_text(description)
     if not user_input:
-        return "Error en la traducción.", None, None, None, None
+        return "Error en la traducción.", None  # Devuelve solo dos valores
 
-    # Generar el embedding del texto
     inputs = processor(text=user_input, return_tensors="pt")
     with torch.no_grad():
         text_embedding = model.get_text_features(**inputs).squeeze(0)
 
-    # Buscar las imágenes más relevantes en el dataset
     results = query_csv(file_name, text_embedding, n_results=1)
     if results.empty:
-        return "No se encontró una imagen relevante.", None, None, None, None
+        return "No se encontró una imagen relevante.", None  # Devuelve solo dos valores
 
-    # Obtener la ruta de la imagen más relevante
     base_path = os.getcwd()
     best_match_metadata = json.loads(results.iloc[0]["metadata"])
     relative_path = best_match_metadata["path"]
     best_match_path = os.path.join(base_path, relative_path)
 
     if not os.path.exists(best_match_path):
-        return f"No se encontró la imagen en la ruta: {best_match_path}", None, None, None, None
+        return f"No se encontró la imagen en la ruta: {best_match_path}", None  # Devuelve solo dos valores
 
-    # Detectar el mueble en la imagen
     image = Image.open(best_match_path)
     furniture = detect_furniture(image)
     if not furniture:
-        return "No se detectó ningún mueble.", None, None, None, None
+        return "No se detectó ningún mueble.", None  # Devuelve solo dos valores
 
-    # Buscar muebles similares en IKEA
     muebles_encontrados = search_furniture_ikea(furniture, n_results=5)
     if not muebles_encontrados or "error" in muebles_encontrados:
-        return "No se encontraron muebles en IKEA.", None, None, None, None
+        return "No se encontraron muebles en IKEA.", None  # Devuelve solo dos valores
 
-    # Procesar los datos de los muebles encontrados
     muebles_tabla = []
     for mueble in muebles_encontrados:
         muebles_tabla.append({
@@ -77,7 +71,8 @@ def search_furniture(description):
             "url": mueble["url"]
         })
 
-    return best_match_path, muebles_tabla
+    return best_match_path, muebles_tabla  # Siempre dos valores
+
 
 
 # Función para procesar imagen
@@ -92,7 +87,6 @@ def process_uploaded_image(image):
     if not muebles_encontrados or "error" in muebles_encontrados:
         return "No se encontraron muebles en IKEA.", None
 
-    # Procesar los datos de los muebles encontrados
     muebles_tabla = []
     for mueble in muebles_encontrados:
         muebles_tabla.append({
@@ -101,7 +95,6 @@ def process_uploaded_image(image):
             "url": mueble["url"]
         })
 
-    # Buscar la imagen más relevante en el dataset
     inputs = processor(images=image, return_tensors="pt")
     with torch.no_grad():
         image_embedding = model.get_image_features(**inputs).squeeze(0)
@@ -118,21 +111,20 @@ def process_uploaded_image(image):
     return best_match_path, muebles_tabla
 
 
+
 # Crear interfaz con Gradio
 def app_interface(description, uploaded_image):
     if description and uploaded_image is None:
-        # Buscar basado en la descripción
-        local_image_path, muebles_tabla = search_furniture(description)
+        local_image_path, muebles_tabla = search_furniture(description)  # Espera dos valores
+        print(f"Resultados de search_furniture: {search_furniture(description)}")
     elif uploaded_image is not None:
-        # Procesar imagen cargada
-        local_image_path, muebles_tabla = process_uploaded_image(uploaded_image)
+        local_image_path, muebles_tabla = process_uploaded_image(uploaded_image)  # También espera dos valores
     else:
         return "Por favor, proporciona una descripción o sube una imagen.", None, None
 
     if not local_image_path:
         return "No se encontraron resultados.", None, None
 
-    # Generar una tabla de los muebles encontrados
     muebles_table_html = """
     <table style="width:100%; text-align:left; border-collapse: collapse; border: 1px solid black;">
         <tr>
@@ -152,6 +144,7 @@ def app_interface(description, uploaded_image):
     muebles_table_html += "</table>"
 
     return local_image_path, muebles_table_html
+
 
 
 

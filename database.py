@@ -12,17 +12,22 @@ def initialize_csv(file_name="embeddings.csv"):
 
 def add_embeddings_to_csv(file_name, embeddings, image_paths):
     df = pd.read_csv(file_name)
+    base_path = os.getcwd()  # Directorio base del proyecto
+
     for idx, embedding in enumerate(embeddings):
-        embedding_list = embedding.tolist()  
-        metadata = {"path": image_paths[idx]}
+        embedding_list = embedding.tolist()
+        relative_path = os.path.relpath(image_paths[idx], start=base_path)  # Convertir a ruta relativa
+        metadata = {"path": relative_path}
         new_row = pd.DataFrame({
             "id": [f"image_{idx}"],
             "embedding": [json.dumps(embedding_list)],
             "metadata": [json.dumps(metadata)]
         })
         df = pd.concat([df, new_row], ignore_index=True)
+    
     df.to_csv(file_name, index=False)
     print(f"Se han guardado {len(embeddings)} embeddings en el archivo CSV.")
+
 
 def query_csv(file_name, text_embedding, n_results=1):
     df = pd.read_csv(file_name)
