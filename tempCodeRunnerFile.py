@@ -1,1 +1,0 @@
-bel_detected_fur
