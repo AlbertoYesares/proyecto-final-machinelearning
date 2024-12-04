@@ -59,7 +59,7 @@ Este sistema permite:
 5. **Ejecuta el programa:**
    Dirígete al directorio del proyecto y ejecuta:
    ```bash
-   python main.py
+   python app/app.py
    ```
 
 ---
@@ -109,13 +109,23 @@ pip install -r requirements.txt
 ## Uso del Proyecto
 
 1. **Ejecución:**
-   - Ve al directorio del proyecto y ejecuta:
-     ```bash
-     python main.py
-     ```
-   - Esto abrirá una interfaz de usuario en tu navegador a través de Gradio.
 
-2. **Opciones de búsqueda:**
+   En local: 
+      - Ve al directorio del proyecto y ejecuta:
+        ```bash
+        python app/app.py
+        ```
+      - Esto abrirá una interfaz de usuario en tu navegador a través de Gradio.
+
+   Desde Docker:
+      - Ve al directorio del proyecto y ejecuta:
+        ```bash
+        docker build -t gradio-app .
+        docker run -p 7860:7860 gradio-app
+        ```
+      - Esto abrirá una interfaz de usuario en tu navegador a través de Docker en el puerto http://0.0.0.0:7860.
+  
+3. **Opciones de búsqueda:**
    - **Por descripción:** Introduce una descripción textual del espacio o mueble que buscas.
    - **Por imagen:** Sube una imagen para detectar los muebles presentes y recibir recomendaciones.
 
