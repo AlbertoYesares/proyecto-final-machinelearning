@@ -7,8 +7,8 @@ url = "https://ikea-api.p.rapidapi.com/keywordSearch"
 # querystring = {"keyword":"chair","countryCode":"us","languageCode":"en"}
 
 headers = {
-    "x-rapidapi-key": "TU_API_KEY",
-    "x-rapidapi-host": "ikea-api.p.rapidapi.com"
+	"x-rapidapi-key": "54c56cd812msha8a6093226094a8p1f7dffjsn42e545d8c203",
+	"x-rapidapi-host": "ikea-api.p.rapidapi.com"
 }
 
 # response = requests.get(url, headers=headers, params=querystring)
